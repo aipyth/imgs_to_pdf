@@ -37,27 +37,30 @@ SORT_BY_NUMB = True
 
 ext = ['.jpg', '.png', '.JPEG']
 
+print("Looking for files in current working directory...")
+
 files = []
 for file_name in os.listdir():
     if os.path.isfile(file_name) and os.path.splitext(file_name)[1] in ext:
         filesize = os.path.getsize(file_name)
         files.append({'filename': file_name, 'filesize': filesize})
 
-print(f"Got {len(files)} file{'s' if len(files) > 1 else ''}")
+print(f"Got {len(files)} file{'s' if len(files) > 1 else ''}.")
+
+
 if SORT_BY_NUMB:
-	print("Sorting...")
-	try:
-		files.sort(key=lambda x: int(re.search(r'\d+', x['filename']).group(0)))
-	except AttributeError:
-		print("Can't do sort. Some files got no number in name.")
+	sbn = input("Sort files by number in filenames? (Y/n): ")
+	if sbn.lower() == 'y':
+		print("Sorting...")
+		try:
+			files.sort(key=lambda x: int(re.search(r'\d+', x['filename']).group(0)))
+		except AttributeError:
+			print("Can't do sort. Some files got no number in name.")
 
-		sbs = input("Perform string-based sorting? (Y/n): ")
-		if sbs.lower() == 'y':
-			files.sort(key=lambda x: x['filename'])
+			sbs = input("Perform string-based sorting? (Y/n): ")
+			if sbs.lower() == 'y':
+				files.sort(key=lambda x: x['filename'])
 
-		# ex = input("Exit (Y/n): ")
-		# if ex.lower() == 'y':
-		# 	exit(0)
 
 if OPTIMIZE:
 	compression_level = int(input("Compression (from 0 to 100): ")) % 100
@@ -76,10 +79,18 @@ for image_inf in files:
 		image.save(image_inf['filename'], optimize=True, quality=QUALITY)
 
 		compressed_by = (image_inf['filesize'] - os.path.getsize(image_inf['filename'])) / image_inf['filesize'] * 100
-		print(f"Image \'{image_inf['filename']}\' has been comresssed by {compressed_by}%")
+		print(f"Image \'{image_inf['filename']}\' has been comresssed. File size {-compressed_by}%.")
 	image.convert("RGB")
 	images.append(image)
 
 
 filename = input("Enter file name: ") + '.pdf'
 images[0].save(filename, save_all=True, append_images=images[1:])
+
+print(f"Output file {filename} has been created.")
+
+df = input("Delete source files? (Y/n): ")
+if df.lower() == 'y':
+	for file in files:
+		os.remove(file['filename'])
+print(f"{len(files)} file{'s' if len(files) > 1 else ''} deleted.")
