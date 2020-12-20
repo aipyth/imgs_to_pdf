@@ -62,8 +62,14 @@ if SORT_BY_NUMB:
 				files.sort(key=lambda x: x['filename'])
 
 
+
+
 if OPTIMIZE:
 	compression_level = int(input("Compression (from 0 to 100): ")) % 100
+	comp_info = input("Show compression information? (Y/n): ")
+
+	use_greyscale = input("Use greyscale instead of RGB? (Y/n): ")
+
 
 images = []
 for image_inf in files:
@@ -76,11 +82,15 @@ for image_inf in files:
 		# resize and save optimizing
 
 		image = image.resize((width, height), Image.ANTIALIAS)
+		if use_greyscale.lower() == 'y':
+			image = image.convert('L')
+		else:
+			image = image.convert('RGB')
 		image.save(image_inf['filename'], optimize=True, quality=QUALITY)
 
-		compressed_by = (image_inf['filesize'] - os.path.getsize(image_inf['filename'])) / image_inf['filesize'] * 100
-		print(f"Image \'{image_inf['filename']}\' has been comresssed. File size {-compressed_by}%.")
-	image.convert("RGB")
+		if comp_info.lower() == 'y':
+			compressed_by = (image_inf['filesize'] - os.path.getsize(image_inf['filename'])) / image_inf['filesize'] * 100
+			print(f"Image \'{image_inf['filename']}\' has been comresssed. File size {-compressed_by}%.")
 	images.append(image)
 
 
@@ -93,4 +103,4 @@ df = input("Delete source files? (Y/n): ")
 if df.lower() == 'y':
 	for file in files:
 		os.remove(file['filename'])
-print(f"{len(files)} file{'s' if len(files) > 1 else ''} deleted.")
+	print(f"{len(files)} file{'s' if len(files) > 1 else ''} deleted.")
